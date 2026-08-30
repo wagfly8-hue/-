@@ -1,0 +1,38 @@
+name: Build HnS Chinese ROM
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - hanhua
+
+permissions:
+  contents: read
+
+jobs:
+  build-hns:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            binutils-arm-none-eabi \
+            gcc-arm-none-eabi \
+            libnewlib-arm-none-eabi \
+            libpng-dev \
+            python3
+
+      - name: Build HnS ROM
+        run: make hns -j$(nproc) -O
+
+      - name: Upload ROM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokehns-gba
+          path: pokehns.gba
+          if-no-files-found: error
